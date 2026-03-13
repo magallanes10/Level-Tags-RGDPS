@@ -2,47 +2,64 @@ name: Build Geode Mod
 
 on:
   workflow_dispatch:
+    inputs:
+      build_type:
+        description: 'Build Type'
+        required: true
+        default: 'debug'
+        type: choice
+        options:
+          - release
+          - debug
   push:
     branches:
       - "**"
 
+      
 jobs:
   build:
     strategy:
       fail-fast: false
+      
       matrix:
         config:
-          - name: Windows
-            os: windows-latest
-            target: Win64
+        - name: Windows
+          os: ubuntu-latest
+          target: Win64
 
-          - name: macOS
-            os: macos-latest
-            target: MacOS
+        - name: macOS
+          os: macos-latest
 
-          - name: iOS
-            os: macos-latest
-            target: iOS
+        - name: Android32
+          os: ubuntu-latest
+          target: Android32
 
-          - name: Android32
-            os: ubuntu-latest
-            target: Android32
+        - name: Android64
+          os: ubuntu-latest
+          target: Android64
 
-          - name: Android64
-            os: ubuntu-latest
-            target: Android64
+        - name: iOS
+          os: macos-latest
+          target: iOS
 
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
-
+    continue-on-error: ${{ github.event.inputs.build_type != 'release' }}
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build the mod (Release)
-        uses: geode-sdk/build-geode-mod@main
+      - name: Set Release Build
+        run: echo "RELEASE_BUILD=${{ github.event.inputs.build_type == 'release' }}" >> $GITHUB_ENV
+
+      - name: Build the mod
+        uses: hiimjasmine00/build-geode-mod@xwin
         with:
+          bindings: geode-sdk/bindings
+          bindings-ref: main
           combine: true
-          sdk: v5.0.0-beta.3   # safer than nightly
+          build-config: ${{ github.event.inputs.build_type != 'release' && 'RelWithDebInfo' || 'Release' }}
+          export-pdb: true
+          export-symbols: true
           target: ${{ matrix.config.target }}
 
   package:
@@ -56,5 +73,71 @@ jobs:
 
       - uses: actions/upload-artifact@v4
         with:
-          name: Build Output
+          name: build-output
           path: ${{ steps.build.outputs.build-output }}
+
+  nightly: 
+    name: Create Nightly Release
+    runs-on: ubuntu-latest
+    if: github.event.inputs.build_type != 'release'
+    needs: ['package']
+    permissions:
+      contents:
+        write
+        
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: './artifacts/'
+
+      - name: Create Nightly Release
+        uses: andelf/nightly-release@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: nightly
+          name: 'Development Release'
+          body: |
+            Development release for commit ${{ github.sha }}. Built in RelWithDebInfo.
+          files: |
+            ./artifacts/build-output/*.geode
+            ./artifacts/build-output/*.pdb
+            ./artifacts/build-output/*.sym
+
+  release:
+    name: Create Draft Release
+    runs-on: ubuntu-latest
+    if: github.event.inputs.build_type == 'release'
+    needs: ['package']
+    permissions:
+      contents:
+        write
+        
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: './artifacts/'
+      
+      - name: Read mod version & mod id
+        id: read_version
+        run: |
+          echo "MOD_VERSION=$(jq -r '.version' mod.json)" >> $GITHUB_ENV
+      - name: Create Draft Release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.MOD_VERSION }}
+          name: ${{ env.MOD_VERSION }}
+          body: |
+            TODO before publishing:
+             - mark if pre-release
+             - add changelog
+             - remove this
+          draft: true
+          files: |
+            ./artifacts/build-output/*.geode
+            ./artifacts/build-output/*.pdb
+            ./artifacts/build-output/*.sym
