@@ -1,3 +1,7 @@
+# v0.4.1-alpha
+- Ported To Geode v5
+
+- Change Discord Link
 # v0.4.0-alpha
 - UI Redesign.
 - Search Tab Redesign.

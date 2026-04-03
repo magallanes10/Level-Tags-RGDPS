@@ -5,3 +5,6 @@ A mod that adds tags to levels and allows to discover them based on specific sty
 # [Discord](https://discord.gg/6GXYHf9WTB)
 Join our Discord to stay up to date with updates and get early access.
 Suggest tags or features and report any issues or bugs.
+
+# Notes
+This is a copy mod of Geode Index Made by [KampsWskiR](user:8776613)

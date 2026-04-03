@@ -6,18 +6,18 @@
 		"android": "2.2081",
 		"ios": "2.2081"
 	},
-	"version": "v0.4.0-alpha",
+	"version": "v0.4.1-alpha",
 	"id": "rgdps.level_tags",
 	"name": "Level Tags",
 	"developer": "RGDPS Team",
 	"description": "A mod that adds tags to levels.",
 	"dependencies": {
 		"geode.node-ids": {
-			"version": ">=v1.17.0",
+			"version": ">=v1.23.3",
 			"required": true
 		},
 		"alphalaneous.happy_textures": {
-			"version": ">=v2.1.6",
+			"version": ">=v2.1.11",
 			"required": true
 		}
 	},
@@ -39,7 +39,7 @@
 	},
 	"links": {
 		"source": "https://github.com/KampWskiR/Level-Tags",
-		"community": "https://discord.gg/6GXYHf9WTB"
+		"community": "https://discord.gg/BwPG2n9F26"
 	},
 	"settings": {
 		"customization": {
@@ -51,7 +51,7 @@
 			"name": "LevelInfoLayer Tags",
 			"description": "Enable tags displaying in LevelInfoLayer.",
 			"type": "bool",
-			"default": false
+			"default": true
 		},
 		"pauseLayerShow": {
 			"name": "Pause Screen Tags",

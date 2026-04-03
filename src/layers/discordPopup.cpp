@@ -61,7 +61,7 @@ bool DiscordPopup::init() {
 }
 
 void DiscordPopup::join(CCObject*) {
-    web::openLinkInBrowser("https://discord.gg/6GXYHf9WTB");
+    web::openLinkInBrowser("https://discord.gg/BwPG2n9F26");
     onClose(this);
 }
 
